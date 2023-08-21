@@ -55,6 +55,8 @@ class _TreeGraphViewState extends State<TreeGraphView> {
   BuchheimWalkerConfiguration builder = BuchheimWalkerConfiguration();
 
   bool isPositionNodeExpanded = false;
+  bool isBranchNodeExpanded = false;
+  bool isAddtionalGmNodeExpanded = false;
 
   @override
   void initState() {
@@ -116,7 +118,7 @@ class _TreeGraphViewState extends State<TreeGraphView> {
     graph.addEdge(additionalGM, drmSur);
 
     builder
-      ..siblingSeparation = 100
+      ..siblingSeparation = 65
       ..levelSeparation = 150
       ..subtreeSeparation = 150
       ..orientation = BuchheimWalkerConfiguration.ORIENTATION_TOP_BOTTOM;
@@ -142,7 +144,10 @@ class _TreeGraphViewState extends State<TreeGraphView> {
           if (node.key?.value == 'General Manager') {
             return GestureDetector(
               onTap: widget.onTapGeneralManager,
-              child: rectangleWidget(node.key?.value?.toString() ?? ''),
+              child: rectangleWidget(
+                node.key?.value?.toString() ?? '',
+                boxColor: Colors.red, // Set the box color to red
+              ),
             );
           } else if (widget.showChildNodes &&
               (node.key?.value == 'Position' ||
@@ -154,15 +159,53 @@ class _TreeGraphViewState extends State<TreeGraphView> {
                   setState(() {
                     isPositionNodeExpanded = !isPositionNodeExpanded;
                   });
+                } else if (node.key?.value == 'Branch') {
+                  setState(() {
+                    isBranchNodeExpanded = !isBranchNodeExpanded;
+                  });
+                } else if (node.key?.value == 'Additional General Manager') {
+                  setState(() {
+                    isAddtionalGmNodeExpanded = !isAddtionalGmNodeExpanded;
+                  });
                 }
               },
               child: rectangleWidget(node.key?.value?.toString() ?? ''),
             );
           } else if ((isPositionNodeExpanded &&
-              (node.key?.value == 'DGM' ||
-                  node.key?.value == 'CPRO' ||
-                  node.key?.value == 'Secretary'))) {
-            return rectangleWidget(node.key?.value?.toString() ?? '');
+                  (node.key?.value == 'DGM' ||
+                      node.key?.value == 'CPRO' ||
+                      node.key?.value == 'Secretary')) ||
+              (isBranchNodeExpanded &&
+                  (node.key?.value == 'SDGM' ||
+                      node.key?.value == 'PCE' ||
+                      node.key?.value == 'PCME' ||
+                      node.key?.value == 'PFA' ||
+                      node.key?.value == 'PCPO' ||
+                      node.key?.value == 'PCMD' ||
+                      node.key?.value == 'PCEE' ||
+                      node.key?.value == 'PCSTE' ||
+                      node.key?.value == 'PCMM' ||
+                      node.key?.value == 'PCSC' ||
+                      node.key?.value == 'CAO/C' ||
+                      node.key?.value == 'PCOM' ||
+                      node.key?.value == 'PCCM' ||
+                      node.key?.value == 'PCSO')) ||
+              (isAddtionalGmNodeExpanded &&
+                  (node.key?.value == 'DRM BB' ||
+                      node.key?.value == 'DRM BSL' ||
+                      node.key?.value == 'DRM Pune' ||
+                      node.key?.value == 'DRM NGP' ||
+                      node.key?.value == 'DRM Sur'))) {
+            return rectangleWidget(
+              node.key?.value?.toString() ?? '',
+              boxColor: node.key?.value == 'DRM BB' ||
+                      node.key?.value == 'DRM BSL' ||
+                      node.key?.value == 'DRM Pune' ||
+                      node.key?.value == 'DRM NGP' ||
+                      node.key?.value == 'DRM Sur'
+                  ? Colors.red
+                  : null, // Set the box color to red for DRM nodes, else null
+            );
           } else {
             return SizedBox.shrink();
           }
@@ -171,14 +214,41 @@ class _TreeGraphViewState extends State<TreeGraphView> {
     );
   }
 
-  Widget rectangleWidget(String label) {
+  Widget rectangleWidget(String label, {Color? boxColor}) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        boxShadow: [BoxShadow(color: Colors.blue, spreadRadius: 1)],
+        borderRadius: BorderRadius.circular(10),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: boxColor != null
+              ? [boxColor, boxColor]
+              : [Colors.lightBlueAccent, Colors.blue],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: Offset(2, 2),
+          ),
+        ],
       ),
-      child: Text(label),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: boxColor != null ? Colors.white : Colors.black,
+          fontWeight: FontWeight.bold,
+          shadows: [
+            Shadow(
+              color: Colors.black.withOpacity(0.2),
+              offset: Offset(2, 2),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
